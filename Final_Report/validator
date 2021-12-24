@@ -1,0 +1,40 @@
+db.createCollection("message_room", {
+   validator: {
+      $jsonSchema: {
+         bsonType: "object",
+         required: [ "student_id", "tutor_id"],
+         properties: {
+            student_id: {
+               bsonType: "string",
+               description: "must be a objectId(be string instead for easier implementation) and is required"
+            },
+            tutor_id: {
+               bsonType: "string",
+               description: "must be a objectId(be string instead for easier implementation) and is required"
+            },
+            message: {
+               bsonType: "array",
+               items: {
+                  bsonType: "object",
+                  required: ["time", "text", "sender"],
+                  description: "must be object and require time and sender",
+                  properties :{
+                     time: {
+                     bsonType: "date",
+                     description: "must be a date and is required"
+                     },
+                     text: {
+                        bsonType: "string",
+                        description: "must be a string and is required"
+                     },
+                     sender: {
+                        enum: ["s", "t"],
+                        description: "must be an enum and is required"
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+})

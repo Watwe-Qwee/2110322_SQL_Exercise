@@ -1,0 +1,77 @@
+CREATE DATABASE tutoreal
+
+USE tutoreal
+
+CREATE TABLE member
+(
+	CitizenID int NOT NULL,
+	Name varchar(100),
+	Last_Name varchar(100),
+	Birthdate date,
+	Address varchar(200),
+	Email varchar(45),
+	Telephone_Number varchar(10),
+	Password varchar(10),
+	isTutor boolean,
+	isStudent boolean,
+	CONSTRAINT pk_member PRIMARY KEY (CitizenID)
+);
+
+CREATE TABLE tutor_ads
+(
+	CitizenID int NOT NULL,
+	AdsID int NOT NULL,
+	ExpireDate date,
+	Status enum('WAITING', 'ACTIVE', 'EXPIRE'),
+	Price float NOT NULL,
+	Detail varchar(200),
+	PRIMARY KEY (CitizenID, AdsID),
+	UNIQUE (AdsID),
+	FOREIGN KEY (CitizenID) REFERENCES member(CitizenID)
+);
+
+CREATE TABLE payment_history
+(
+	CitizenID_Tutor int NOT NULL,
+	CitizenID_Student int NOT NULL,
+	PaymentID int NOT NULL,
+	Status enum('COMPLETE', 'CANCEL', 'WAITING'),
+	Amount float NOT NULL,
+	DateTime datetime,
+	PRIMARY KEY (CitizenID_Tutor, CitizenID_Student, PaymentID),
+	UNIQUE (PaymentID),
+	FOREIGN KEY (CitizenID_Tutor) REFERENCES member(CitizenID)
+);
+
+INSERT INTO member VALUES (1, 'Tutor-1', 'Tutor-1', NULL, NULL, NULL, NULL, NULL, 1, 0),
+						(2, 'Tutor-2', 'Tutor-2', NULL, NULL, NULL, NULL, NULL, 1, 0),
+						(3, 'Tutor-3', 'Tutor-3', NULL, NULL, NULL, NULL, NULL, 1, 0),
+						(4, 'Tutor-4', 'Tutor-4', NULL, NULL, NULL, NULL, NULL, 1, 0),
+						(5, 'Tutor-5', 'Tutor-5', NULL, NULL, NULL, NULL, NULL, 1, 0);
+
+INSERT INTO tutor_ads VALUES (1, 1, '2021-09-14', 'EXPIRE', 150.00, NULL),
+							(1, 2, '2021-09-14', 'EXPIRE', 150.00, NULL),
+							(5, 3, '2021-09-14', 'EXPIRE', 150.00, NULL);
+
+
+INSERT INTO payment_history VALUES (1, 1, 1, 'COMPLETE', 150.00, '2021-09-09'),
+									(1, 2, 2, 'COMPLETE', 150.00, '2021-09-11'),
+									(1, 1, 3, 'COMPLETE', 150.00, '2021-09-14'),
+									(1, 3, 4, 'CANCEL', 150.00, '2021-09-14'),
+									(1, 1, 5, 'COMPLETE', 150.00, '2021-09-15'),
+									(1, 2, 6, 'COMPLETE', 150.00, '2021-09-16'),
+									(1, 4, 7, 'COMPLETE', 150.00, '2021-09-17'),
+									(1, 5, 8, 'CANCEL', 150.00, '2021-09-18'),
+									(1, 1, 9, 'COMPLETE', 150.00, '2021-09-20'),
+									(1, 6, 10, 'COMPLETE', 150.00, '2021-09-21'),
+									(2, 1, 11, 'COMPLETE', 150.00, '2021-09-14'),
+									(3, 1, 12, 'COMPLETE', 150.00, '2021-09-15'),
+									(3, 1, 13, 'COMPLETE', 150.00, '2021-09-16'),
+									(4, 1, 14, 'CANCEL', 150.00, '2021-09-14'),
+									(5, 1, 15, 'COMPLETE', 150.00, '2021-09-12'),
+									(5, 1, 16, 'COMPLETE', 150.00, '2021-09-13'),
+									(5, 3, 17, 'CANCEL', 150.00, '2021-09-14'),
+									(5, 1, 18, 'COMPLETE', 150.00, '2021-09-15'),
+									(5, 2, 19, 'COMPLETE', 150.00, '2021-09-16'),
+									(5, 1, 20, 'COMPLETE', 150.00, '2021-09-20'),
+									(5, 6, 21, 'COMPLETE', 150.00, '2021-09-21');

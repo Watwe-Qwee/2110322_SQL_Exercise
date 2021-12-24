@@ -1,0 +1,37 @@
+
+DELIMITER $$
+
+CREATE PROCEDURE Find_Description (IN input VARCHAR(10), OUT output decimal(6,2))
+BEGIN
+    DECLARE price decimal(6,2);
+
+	SELECT standard_price INTO price
+    FROM PRODUCT
+    WHERE product_description = input;
+
+    SELECT price INTO output;
+END$$
+DELIMITER ;
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `Find_Description2`(IN input VARCHAR(10))
+BEGIN
+    SELECT Get_Expensive(standard_price) 
+    FROM PRODUCT
+    WHERE product_description = input;
+END
+
+
+DELIMITER $$
+
+CREATE FUNCTION Get_Expensive(price double)
+    RETURN VARCHAR(10)
+    DETERMINISTIC
+BEGIN
+    DECLARE pang VARCHAR(10);
+    IF price > 20000 THEN 
+        SET pang = 'Expensive';
+    ELSE THEN
+        SET pang = 'Cheap'
+    RETURN pang;
+END$$
+DELIMITER ;

@@ -1,0 +1,155 @@
+#1
+SELECT postal_code, COUNT(customer_id) AS number_of_customers
+FROM customer
+GROUP BY postal_code
+ORDER BY postal_code;
+
+#2
+SELECT postal_code, COUNT(customer_id) AS number_of_customers
+FROM customer
+GROUP BY postal_code
+HAVING number_of_customers>1
+ORDER BY postal_code DESC;
+
+#3
+SELECT order_id, order_date, customer_id
+FROM ordert
+WHERE customer_id = 10001
+ORDER BY order_date DESC;
+
+#4
+SELECT p2.product_id, p2.product_description
+FROM order_line ol2, product p2
+WHERE p2.product_id  = ol2.product_id
+GROUP BY p2.product_id
+HAVING COUNT(ol2.order_id) = (
+
+	SELECT MAX(number_of_orders) 
+	FROM(
+		SELECT p.product_id, COUNT(ol.order_id) AS number_of_orders
+		FROM order_line ol,product p
+		WHERE p.product_id  = ol.product_id
+		GROUP BY p.product_id
+	) sub
+);
+
+#5
+SELECT c.customer_id, c.customer_name, COUNT(o.order_id) AS number_of_orders
+FROM customer c, ordert o
+WHERE c.customer_id = o.customer_id
+GROUP BY c.customer_id
+ORDER BY number_of_orders DESC;
+
+#6
+SELECT sub1.customer_id, sub1.customer_name
+FROM (
+	SELECT customer_id, customer_name
+	FROM customer
+) sub1,(
+	SELECT customer_id, COUNT(order_id) as Total_order_per_customer
+	FROM ordert
+	GROUP BY customer_id
+	HAVING Total_order_per_customer = (
+		SELECT MAX(Total_order_per_customer)
+		FROM (
+			SELECT COUNT(order_id) as Total_order_per_customer
+			FROM ordert
+			GROUP BY customer_id
+	) AS sub)
+) sub2
+
+WHERE sub1.customer_id=sub2.customer_id;
+
+#7
+SELECT p.product_id, p.product_description, SUM(ol.ordered_quantity) AS number_of_orders
+FROM order_line AS ol, product AS p
+WHERE p.product_id = ol.product_id
+GROUP BY ol.product_id
+HAVING SUM(ol.ordered_quantity) = (
+	SELECT max(sum_ordered_quantity)
+	FROM (
+		SELECT SUM(ordered_quantity) AS sum_ordered_quantity
+		FROM order_line 
+		GROUP BY product_id
+	) AS sub
+)
+ORDER BY p.product_id
+
+#8 
+SELECT * 
+FROM(
+	SELECT c.customer_id, c.customer_name, COUNT(o.order_id) AS number_of_orders
+	FROM customer c, ordert o
+	WHERE c.customer_id = o.customer_id
+	GROUP BY c.customer_id
+	ORDER BY number_of_orders DESC
+) AS sub
+LIMIT 3;
+
+#9
+SELECT DISTINCT c.customer_id, c.customer_name
+FROM customer c
+WHERE c.customer_id IN (
+	SELECT o.customer_id
+	FROM ordert o
+	WHERE o.order_date BETWEEN '2020-01-10' AND '2020-01-16'
+)
+ORDER BY c.customer_id;
+
+#10
+SELECT product_id, product_description, product_finish
+FROM product
+WHERE product_finish LIKE 'White%'
+ORDER BY product_id;
+
+#11
+SELECT customer_id, customer_name
+FROM customer
+WHERE customer_id NOT IN (
+	SELECT DISTINCT c.customer_id
+	FROM ordert o, customer c
+	WHERE c.customer_id = o.customer_id
+)
+ORDER BY customer_id DESC
+;
+
+
+#12
+SELECT COUNT(order_id) AS number_of_orders
+FROM ordert
+WHERE order_date between '2020-01-10' AND '2020-01-16';
+
+#13
+SELECT SUM(p.standard_price*ol.ordered_quantity) as total_payment
+FROM product p, order_line ol 
+WHERE ol.order_id = 3 AND p.product_id = ol.product_id
+GROUP BY ol.order_id;
+
+#14
+SELECT ol.order_id, SUM(ol.ordered_quantity*p.standard_price) AS total_payment
+FROM order_line AS ol, product AS p
+WHERE ol.product_id = p.product_id
+GROUP BY ol.order_id
+ORDER BY total_payment DESC;
+
+#15
+SELECT sub1.customer_id, sub1.customer_name
+FROM (
+	SELECT c.customer_id, c.customer_name, o.order_id
+	FROM ordert o, customer c
+	WHERE c.customer_id = o.customer_id
+) AS sub1,(
+	SELECT ol.order_id
+	FROM order_line AS ol, product AS p
+	WHERE ol.product_id = p.product_id
+	GROUP BY ol.order_id
+	HAVING SUM(ol.ordered_quantity*p.standard_price) = (
+		SELECT MAX(total_payment)
+		FROM(
+			SELECT SUM(ol.ordered_quantity*p.standard_price) AS total_payment
+			FROM order_line AS ol, product AS p
+			WHERE ol.product_id = p.product_id
+			GROUP BY ol.order_id
+		)AS sub)
+) AS sub2
+WHERE sub1.order_id = sub2.order_id;

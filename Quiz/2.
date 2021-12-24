@@ -1,0 +1,57 @@
+1.
+SELECT m.channel_name, sub.content_id, sub.content_name, sub.views
+FROM member as m, 
+(SELECT c.member_id,c.content_id, c.content_name, c.views
+FROM content as c
+WHERE c.member_id = '009' AND c.views >= ALL(
+	SELECT c.views
+	FROM content as c
+	WHERE c.member_id = '009'
+)) AS sub
+WHERE sub.member_id = m.member_id;
+
+2.
+SELECT m.channel_name, sub.number_of_content
+FROM member AS m, (
+	SELECT c.member_id, COUNT(c.content_id) as number_of_content
+	FROM content AS c
+	WHERE c.content_name LIKE '%Bakery%' OR c.content_name LIKE '%bakery%'
+	GROUP BY c.member_id) AS sub
+WHERE m.member_id=sub.member_id
+ORDER BY sub.number_of_content DESC;
+
+3.
+SELECT m.channel_name, sub.number_of_like
+FROM member AS m,(
+	SELECT c.member_id, SUM(c.likes) AS number_of_like
+	FROM content AS c
+	GROUP BY c.member_id) AS sub
+WHERE m.member_id = sub.member_id AND sub.number_of_like>500
+ORDER BY sub.number_of_like DESC
+; 
+
+4.
+SELECT c.content_id, c.content_name, (c.views * a.pay_per_view) AS income
+FROM content AS c, ads AS a, adsin AS ai
+WHERE c.content_id = ai.content_id AND a.ads_id = ai.ads_id
+ORDER BY income DESC;
+
+5.
+SELECT c.content_id, c.content_name
+FROM content AS c
+WHERE NOT EXISTS(
+	SELECT *
+    FROM adsin as ai
+    WHERE ai.content_id = c.content_id
+)
+ORDER BY c.content_id;
+
+6.
+SELECT c.content_name, c.views, getContentRating(c.views)
+FROM content as c
+ORDER BY c.content_name;
+
+7.
+set @income = 0;
+call quiz1.GetContentIncome('c052', @income);
+select @income;

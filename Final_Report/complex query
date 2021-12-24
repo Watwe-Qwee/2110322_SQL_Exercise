@@ -1,0 +1,20 @@
+SELECT sub1.CitizenID AS TutorID, sub1.Ads_Cost, sub2.Income
+FROM (
+	SELECT CitizenID, SUM(Price) AS Ads_Cost
+	FROM tutor_ads
+	WHERE ExpireDate BETWEEN '2021-09-10' AND '2021-09-20'
+    GROUP BY CitizenID
+) AS sub1
+INNER JOIN (
+	SELECT p.CitizenID_Tutor, SUM(amount) AS Income
+	FROM payment_history AS p, (
+		SELECT CitizenID, MIN(ExpireDate) AS ExpireDate
+		FROM tutor_ads
+		WHERE ExpireDate BETWEEN '2021-09-10' AND '2021-09-20'
+		GROUP BY CitizenID
+	) AS sub2
+	WHERE  p.payment_status = 'COMPLETE' 
+	AND (p.payment_DateTime BETWEEN sub2.ExpireDate AND '2021-09-20') 
+	AND sub2.CitizenID = p.CitizenID_Tutor
+	GROUP BY p.CitizenID_Tutor
+) AS sub2 ON sub2.CitizenID_Tutor = sub1.CitizenID;
